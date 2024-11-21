@@ -185,7 +185,7 @@ class TestSubmissionAttachments(TestCase):
                         form_id=fixture["form_id"],
                         project_id=fixture["project_id"],
                     )
-        self.assertIn('file_name: str type expected', str(context.exception))
+        self.assertIn("file_name: str type expected", str(context.exception))
 
     def test_upload_file__ok(self):
         """Should return True when the file attachment is successfully uploaded."""
