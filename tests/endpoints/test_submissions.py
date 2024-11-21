@@ -1,19 +1,17 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from pyodk._endpoints.submission_attachments import (
-    SubmissionAttachmentService,
-    SubmissionAttachment,
-)
+from pyodk._endpoints.submission_attachments import SubmissionAttachment
 from pyodk._endpoints.submissions import Submission
 from pyodk._utils.session import Session
 from pyodk.client import Client
+from pyodk.errors import PyODKError
 
 from tests.resources import (
-    RESOURCES,
     CONFIG_DATA,
-    submissions_data,
+    RESOURCES,
     submission_attachments_data,
+    submissions_data,
 )
 
 
@@ -172,6 +170,23 @@ class TestSubmissionAttachments(TestCase):
                 )
         self.assertTrue(observed)
 
+    def test_upload_bytes__no_filename(self):
+        """Should return False when no filename is passed uploading bytes."""
+        fixture = submission_attachments_data.test_submission_attachment_upload
+        with self.assertRaises(PyODKError) as context:
+            with patch.object(Session, "request") as mock_session:
+                mock_session.return_value.status_code = 200
+                mock_session.return_value.json.return_value = {"success": False}
+                with Client() as client:
+                    client.submission_attachments.upload(
+                        file_path_or_bytes=fixture["file_path_or_bytes"],
+                        instance_id=fixture["instance_id"],
+                        file_name=None,
+                        form_id=fixture["form_id"],
+                        project_id=fixture["project_id"],
+                    )
+        self.assertIn('file_name: str type expected', str(context.exception))
+
     def test_upload_file__ok(self):
         """Should return True when the file attachment is successfully uploaded."""
         fixture = submission_attachments_data.test_submission_attachment_upload
@@ -191,3 +206,23 @@ class TestSubmissionAttachments(TestCase):
                     project_id=fixture["project_id"],
                 )
             self.assertTrue(observed)
+
+    def test_upload_file__not_exist(self):
+        """Should return False when attempting upload of non-existent file."""
+        fixture = submission_attachments_data.test_submission_attachment_upload
+        with self.assertRaises(PyODKError) as context:
+            with patch.object(Session, "request") as mock_session:
+                mock_session.return_value.status_code = 200
+                mock_session.return_value.json.return_value = {"success": False}
+                with Client() as client:
+                    client.submission_attachments.upload(
+                        file_path_or_bytes="/file/path/does/not/exist.jpg",
+                        instance_id=fixture["instance_id"],
+                        file_name=None,
+                        form_id=fixture["form_id"],
+                        project_id=fixture["project_id"],
+                    )
+        self.assertIn(
+            'file_path: file or directory at path "/file/path/does/not/exist.jpg" does not exist',
+            str(context.exception),
+        )
