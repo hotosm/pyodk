@@ -5,8 +5,8 @@ from pyodk._endpoints.entities import EntityService
 from pyodk._endpoints.entity_lists import EntityListService
 from pyodk._endpoints.forms import FormService
 from pyodk._endpoints.projects import ProjectService
-from pyodk._endpoints.submissions import SubmissionService
 from pyodk._endpoints.submission_attachments import SubmissionAttachmentService
+from pyodk._endpoints.submissions import SubmissionService
 from pyodk._utils import config
 from pyodk._utils.session import Session
 

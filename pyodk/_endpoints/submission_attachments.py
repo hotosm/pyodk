@@ -133,10 +133,8 @@ class SubmissionAttachmentService(bases.Service):
             iid = pv.validate_instance_id(instance_id)
             if isinstance(file_path_or_bytes, bytes):
                 file_bytes = file_path_or_bytes
-                if not file_name:
-                    raise PyODKError(
-                        "A file_name param must be used if uploading file bytes directly"
-                    )
+                # file_name cannot be empty when passing a bytes object
+                pv.validate_str(file_name, key="file_name")
             else:
                 file_path = pv.validate_file_path(file_path_or_bytes)
                 with open(file_path_or_bytes, "rb") as fd:
