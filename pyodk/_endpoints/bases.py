@@ -11,7 +11,7 @@ class Model(BaseModel):
 
 class FrozenModel(Model):
     """Make the base configuration model faux-immutable.
-    
+
     NOTE in pydantic v2 inherited model_config are *merged*.
     """
 
