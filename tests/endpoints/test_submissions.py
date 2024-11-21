@@ -222,7 +222,6 @@ class TestSubmissionAttachments(TestCase):
                         form_id=fixture["form_id"],
                         project_id=fixture["project_id"],
                     )
-        self.assertIn(
-            'file_path: file or directory at path "/file/path/does/not/exist.jpg" does not exist',
-            str(context.exception),
-        )
+        self.assertIn("file_path: file or directory at path", str(context.exception))
+        # NOTE we avoid checking the path in the exception, due to differences on Windows/Linux
+        self.assertIn("does not exist", str(context.exception))
