@@ -43,19 +43,21 @@ def objectify_config(config_data: dict) -> Config:
     Convert a config dict into objects to validate the data.
     """
     central = CentralConfig(**config_data["central"])
-    config = Config(central=central)
-    return config
+    return Config(central=central)
 
 
 def get_path(path: str, env_key: str) -> Path:
     """
     Get a path from the path argument, the environment key, or the default.
     """
+    # Manually specified path
     if path is not None:
         return Path(path)
     env_file_path = os.environ.get(env_key)
+    # User specified path from env var
     if env_file_path is not None:
         return Path(env_file_path)
+    # Use default ./.pyodk_config.toml
     return defaults[env_key]
 
 
@@ -82,11 +84,44 @@ def read_toml(path: Path) -> dict:
 
 def read_config(config_path: str | None = None) -> Config:
     """
-    Read the config file.
+    Read the config from the user environment or config file.
+
+    The following priority is used:
+    1. Environment variables
+    2. User-specified config file
+    3. Default config file `.pyodk_config.toml`
+    4. Error if no valid configuration is found
     """
-    file_path = get_path(path=config_path, env_key="PYODK_CONFIG_FILE")
-    file_data = read_toml(path=file_path)
-    return objectify_config(config_data=file_data)
+    # First, check if all three environment variables are present
+    env_config = {
+        "central": {
+            "base_url": os.getenv("PYODK_BASE_URL"),
+            "username": os.getenv("PYODK_USERNAME"),
+            "password": os.getenv("PYODK_PASSWORD"),
+        }
+    }
+
+    default_project_id = os.getenv("PYODK_DEFAULT_PROJECT_ID")
+    if default_project_id:  # Include optional `default_project_id` key, only if it's set
+        env_config["central"]["default_project_id"] = default_project_id
+
+    if all(env_config["central"].values()):
+        return objectify_config(config_data=env_config)
+
+    # Next, check credentials from config file
+    file_path = get_config_path(config_path)
+    if file_path.exists():
+        file_data = read_toml(file_path)
+        return objectify_config(config_data=file_data)
+
+    # Finally, if no configuration then error
+    err_msg = (
+        "No valid configuration found. Please provide a config file "
+        "or set the required environment variables. "
+        "See https://github.com/getodk/pyodk?tab=readme-ov-file#configure for details."
+    )
+    log.error(err_msg)
+    raise PyODKError(err_msg)
 
 
 def read_cache_token(cache_path: str | None = None) -> str:
