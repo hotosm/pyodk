@@ -15,7 +15,7 @@ class SubmissionAttachment(bases.Model):
 
 
 class URLs(bases.FrozenModel):
-    _submission: str = "projects/{project_id}/forms/{form_id}/submissions/{{instance_id}}"
+    _submission: str = "projects/{project_id}/forms/{form_id}/submissions/{instance_id}"
     list: str = f"{_submission}/attachments"
     get: str = f"{_submission}/attachments/{{fname}}"
     post: str = f"{_submission}/attachments/{{fname}}"
