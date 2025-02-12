@@ -1,7 +1,10 @@
+import os
 from datetime import datetime
 from pathlib import Path
 from unittest import TestCase, skip
+from unittest.mock import patch
 
+from pyodk._utils.config import CentralConfig
 from pyodk.client import Client
 
 from tests.resources import RESOURCES, forms_data, submissions_data
@@ -92,6 +95,36 @@ def create_test_entity_lists(client: Client | None = None) -> Client:
         entity_props=["test_label", "another_prop"],
     )
     return client
+
+
+class TestClientConfig(TestCase):
+    """Test configuring the client directly, instead of via TOML file."""
+
+    def test_config_from_obj__ok__(self):
+        """Client configured via CentralConfig object."""
+        client_config = CentralConfig(
+            base_url="https://obj.config.com",
+            username="user@obj.config.com",
+            password="ConfigPassword",  # noqa: S106
+        )
+        client = Client(config_path=client_config)
+        self.assertEqual(client.config.central.base_url, client_config.base_url)
+        self.assertEqual(client.config.central.username, client_config.username)
+        self.assertEqual(client.config.central.password, client_config.password)
+
+    def test_config_from_env_vars__ok__(self):
+        """Client configured via environment variables."""
+        cfg = {
+            "PYODK_BASE_URL": "https://env.vars.config.com",
+            "PYODK_USERNAME": "user@env.vars.config.com",
+            "PYODK_PASSWORD": "EnvPassword",
+            "PYODK_DEFAULT_PROJECT_ID": "123",
+        }
+        with patch.dict(os.environ, cfg, clear=True):
+            client = Client()
+            self.assertEqual(client.config.central.base_url, cfg["PYODK_BASE_URL"])
+            self.assertEqual(client.config.central.username, cfg["PYODK_USERNAME"])
+            self.assertEqual(client.config.central.password, cfg["PYODK_PASSWORD"])
 
 
 @skip
