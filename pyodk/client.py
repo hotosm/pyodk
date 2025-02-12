@@ -31,13 +31,17 @@ class Client:
 
     def __init__(
         self,
-        config_path: str | None = None,
+        config_path: str | config.CentralConfig | None = None,
         cache_path: str | None = None,
         project_id: int | None = None,
         session: Session | None = None,
         api_version: str | None = "v1",
     ) -> None:
-        self.config: config.Config = config.read_config(config_path=config_path)
+        # NOTE config_path is named a such to avoid breaking the API
+        if isinstance(config_path, config.CentralConfig):
+            self.config: config.Config = config.Config(central=config_path)
+        else:
+            self.config: config.Config = config.read_config(config_path=config_path)
         self._project_id: int | None = project_id
         if session is None:
             session = Session(
