@@ -162,7 +162,10 @@ class TestConfig(TestCase):
         }
         with (
             patch.dict(os.environ, cfg, clear=True),
-            patch("pyodk._utils.config.get_config_path", return_value=Path(resources.CONFIG_FILE)),
+            patch(
+                "pyodk._utils.config.get_config_path",
+                return_value=Path(resources.CONFIG_FILE),
+            ),
             patch(
                 "pyodk._utils.config.read_toml",
                 return_value={
