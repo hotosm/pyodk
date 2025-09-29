@@ -56,6 +56,22 @@ The `Client` is specific to a configuration and cache file. These approximately 
 - Setting environment variables `PYODK_CONFIG_FILE` and `PYODK_CACHE_FILE`
 - Init arguments: `Client(config_path="my_config.toml", cache_path="my_cache.toml")`.
 
+### Environment variables
+
+Alternatively, instead of a config file, it is possible to use environment variables for configuration.
+
+The available options are:
+
+```dotenv
+# If one is set, they must all be set
+PYODK_BASE_URL=https://example.com
+PYODK_USERNAME=user@example.com
+PYODK_PASSWORD=yourpassword
+
+# Optional variable
+PYODK_DEFAULT_PROJECT_ID=1
+```
+
 ### Default project
 
 The `Client` is not specific to a project, but a default `project_id` can be set by:
